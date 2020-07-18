@@ -3,10 +3,10 @@
     "host": "us-cdbr-east-02.cleardb.com",
     "port": 3306,
     "url": "",
-    "database": "heroku_84a8ec4e16821fc",
-    "password": "9ead41d6",
+    "database": "heroku_27e26756547387b",
+    "password": "21c2a805",
     "name": "db",
-    "user": "b489251aefcc4b",
+    "user": "b2da6dc331e030",
     "connector": "mysql"
   },
   "Email": {
