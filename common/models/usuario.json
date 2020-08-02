@@ -1,5 +1,7 @@
 {
     "name": "usuario",
+    "base": "PersistedModel",
+    "idInjection": true,
     "properties": {
       "nombre": {
         "type": "string"
@@ -24,7 +26,8 @@
   
     },
     "options": {
-      "caseSensitiveEmail": true
+      "caseSensitiveEmail": true,
+      "validateUpsert": true
     },
     "hidden": ["password", "verificationToken"],
     "acls": [
