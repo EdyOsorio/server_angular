@@ -8,10 +8,10 @@
  */
 
 'use strict';
-var g = require('../../lib/globalize');
+var g = require('loopback/lib/globalize');
 var isEmail = require('isemail');
-var loopback = require('../../lib/loopback');
-var utils = require('../../lib/utils');
+var loopback = require('loopback/lib/loopback');
+var utils = require('loopback/lib/utils');
 var path = require('path');
 var qs = require('querystring');
 var SALT_WORK_FACTOR = 10;
