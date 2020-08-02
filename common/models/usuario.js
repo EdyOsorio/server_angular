@@ -1,12 +1,3 @@
-// Copyright IBM Corp. 2014,2019. All Rights Reserved.
-// Node module: loopback
-// This file is licensed under the MIT License.
-// License text available at https://opensource.org/licenses/MIT
-
-/*!
- * Module Dependencies.
- */
-
 'use strict';
 var g = require('loopback/lib/globalize');
 var isEmail = require('isemail');
@@ -37,13 +28,13 @@ var DEFAULT_RESET_PW_TTL = 15 * 60; // 15 mins in seconds
 var DEFAULT_MAX_TTL = 31556926; // 1 year in seconds
 var assert = require('assert');
 
-var debug = require('debug')('loopback:Usuario');
+var debug = require('debug')('loopback:usuario');
 
 /**
- * Built-in Usuario model.
+ * Built-in Usuarios model.
  * Extends LoopBack [PersistedModel](#persistedmodel-new-persistedmodel).
  *
- * Default `Usuario` ACLs.
+ * Default `Usuarios` ACLs.
  *
  * - DENY EVERYONE `*`
  * - ALLOW EVERYONE `create`
@@ -56,17 +47,17 @@ var debug = require('debug')('loopback:Usuario');
  * @property {String} nombre Must be unique.
  * @property {String} password Hidden from remote clients.
  * @property {String} email Must be valid email.
- * @property {Boolean} emailVerified Set when a usuario's email has been verified via `confirm()`.
+ * @property {Boolean} emailVerified Set when a user's email has been verified via `confirm()`.
  * @property {String} verificationToken Set when `verify()` is called.
- * @property {String} realm The namespace the usuario belongs to. See [Partitioning usuarios with realms](http://loopback.io/doc/en/lb2/Partitioning-usuario-with-realms.html) for details.
+ * @property {String} realm The namespace the user belongs to. See [Partitioning users with realms](http://loopback.io/doc/en/lb2/Partitioning-users-with-realms.html) for details.
  * @property {Object} settings Extends the `Model.settings` object.
  * @property {Boolean} settings.emailVerificationRequired Require the email verification
  * process before allowing a login.
- * @property {Number} settings.ttl Default time to live (in seconds) for the `AccessToken` created by `Usuario.login() / usuario.createAccessToken()`.
+ * @property {Number} settings.ttl Default time to live (in seconds) for the `AccessToken` created by `User.login() / user.createAccessToken()`.
  * Default is `1209600` (2 weeks)
- * @property {Number} settings.maxTTL The max value a usuario can request a token to be alive / valid for.
+ * @property {Number} settings.maxTTL The max value a user can request a token to be alive / valid for.
  * Default is `31556926` (1 year)
- * @property {Boolean} settings.realmRequired Require a realm when logging in a usuario.
+ * @property {Boolean} settings.realmRequired Require a realm when logging in a user.
  * @property {String} settings.realmDelimiter When set a realm is required.
  * @property {Number} settings.resetPasswordTokenTTL Time to live for password reset `AccessToken`. Default is `900` (15 minutes).
  * @property {Number} settings.saltWorkFactor The `bcrypt` salt work factor. Default is `10`.
@@ -75,10 +66,10 @@ var debug = require('debug')('loopback:Usuario');
  * @class Usuario
  * @inherits {PersistedModel}
  */
-
 module.exports = function(Usuario) {
-  /**
-   * Create access token for the logged in usuario. This method can be overridden to
+
+ /**
+   * Create access token for the logged in Users. This method can be overridden to
    * customize how access tokens are generated
    *
    * Supported flavours:
@@ -123,8 +114,8 @@ module.exports = function(Usuario) {
       tokenData = {};
     }
 
-    var usuarioSettings = this.constructor.settings;
-    tokenData.ttl = Math.min(tokenData.ttl || usuarioSettings.ttl, usuarioSettings.maxTTL);
+    var userSettings = this.constructor.settings;
+    tokenData.ttl = Math.min(tokenData.ttl || userSettings.ttl, userSettings.maxTTL);
     this.accessTokens.create(tokenData, options, cb);
     return cb.promise;
   };
@@ -250,14 +241,14 @@ module.exports = function(Usuario) {
     if (!query.email && !query.nombre) {
       var err2 = new Error(g.f('{{nombre}} or {{email}} is required'));
       err2.statusCode = 400;
-      err2.code = 'nombre_EMAIL_REQUIRED';
+      err2.code = 'NOMBRE_EMAIL_REQUIRED';
       fn(err2);
       return fn.promise;
     }
     if (query.nombre && typeof query.nombre !== 'string') {
       var err3 = new Error(g.f('Invalid nombre'));
       err3.statusCode = 400;
-      err3.code = 'INVALID_nombre';
+      err3.code = 'INVALID_NOMBRE';
       fn(err3);
       return fn.promise;
     } else if (query.email && typeof query.email !== 'string') {
@@ -276,9 +267,9 @@ module.exports = function(Usuario) {
       function tokenHandler(err, token) {
         if (err) return fn(err);
         if (Array.isArray(include) ? include.indexOf('usuario') !== -1 : include === 'usuario') {
-          // NOTE(bajtos) We can't set token.usuario here:
-          //  1. token.usuario already exists, it's a function injected by
-          //     "AccessToken belongsTo Usuario" relation
+          // NOTE(bajtos) We can't set token.user here:
+          //  1. token.user already exists, it's a function injected by
+          //     "AccessToken belongsTo User" relation
           //  2. ModelBaseClass.toJSON() ignores own properties, thus
           //     the value won't be included in the HTTP response
           // See also loopback#161 and loopback#162
@@ -288,17 +279,17 @@ module.exports = function(Usuario) {
       }
 
       if (err) {
-        debug('An error is reported from Usuario.findOne: %j', err);
+        debug('An error is reported from Usuarios.findOne: %j', err);
         fn(defaultError);
       } else if (usuario) {
         usuario.hasPassword(credentials.password, function(err, isMatch) {
           if (err) {
-            debug('An error is reported from Usuario.hasPassword: %j', err);
+            debug('An error is reported from Usuarios.hasPassword: %j', err);
             fn(defaultError);
           } else if (isMatch) {
             if (self.settings.emailVerificationRequired && !usuario.emailVerified) {
               // Fail to log in if email verification is not done yet
-              debug('Usuario email has not been verified');
+              debug('Users email has not been verified');
               err = new Error(g.f('login failed as the email has not been verified'));
               err.statusCode = 401;
               err.code = 'LOGIN_FAILED_EMAIL_NOT_VERIFIED';
@@ -314,12 +305,12 @@ module.exports = function(Usuario) {
               }
             }
           } else {
-            debug('The password is invalid for usuario %s', query.email || query.nombre);
+            debug('The password is invalid for usuarios %s', query.email || query.nombre);
             fn(defaultError);
           }
         });
       } else {
-        debug('No matching record is found for usuario %s', query.email || query.nombre);
+        debug('No matching record is found for usuarios %s', query.email || query.nombre);
         fn(defaultError);
       }
     });
@@ -327,10 +318,10 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Logout a usuario with the given accessToken id.
+   * Logout a users with the given accessToken id.
    *
    * ```js
-   *    Usuario.logout('asd0a9f8dsj9s0s3223mk', function (err) {
+   *    Users.logout('asd0a9f8dsj9s0s3223mk', function (err) {
   *      console.log(err || 'Logged out');
   *    });
    * ```
@@ -367,7 +358,7 @@ module.exports = function(Usuario) {
   };
 
   Usuario.observe('before delete', function(ctx, next) {
-    // Do nothing when the access control was disabled for this usuario model.
+    // Do nothing when the access control was disabled for this users model.
     if (!ctx.Model.relations.accessTokens) return next();
 
     var AccessToken = ctx.Model.relations.accessTokens.modelTo;
@@ -384,7 +375,7 @@ module.exports = function(Usuario) {
   });
 
   /**
-   * Compare the given `password` with the usuarios hashed password.
+   * Compare the given `password` with the Userss hashed password.
    *
    * @param {String} password The plain text password
    * @callback {Function} callback Callback function
@@ -407,11 +398,11 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Change this usuario's password.
+   * Change this users's password.
    *
-   * @param {*} usuarioId Id of the usuario changing the password
+   * @param {*} usuarioId Id of the users changing the password
    * @param {string} oldPassword Current password, required in order
-   *   to strongly verify the identity of the requesting usuario
+   *   to strongly verify the identity of the requesting users
    * @param {string} newPassword The new password to use.
    * @param {object} [options]
    * @callback {Function} callback
@@ -426,12 +417,12 @@ module.exports = function(Usuario) {
     cb = cb || utils.createPromiseCallback();
 
     // Make sure to use the constructor of the (sub)class
-    // where the method is invoked from (`this` instead of `usuario`)
+    // where the method is invoked from (`this` instead of `Users`)
     this.findById(usuarioId, options, (err, inst) => {
       if (err) return cb(err);
 
       if (!inst) {
-        const err = new Error(`usuario ${usuarioId} not found`);
+        const err = new Error(` Usuario ${usuarioId} not found`);
         Object.assign(err, {
           code: 'USUARIO_NOT_FOUND',
           statusCode: 401,
@@ -445,38 +436,11 @@ module.exports = function(Usuario) {
     return cb.promise;
   };
 
-
-  Usuario.obtieneCliente = function(cb) {
-    var sql = 'SELECT us.id, us.realm, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN role rl on us.roleid = rl.id WHERE estado = "activo" ';
-    var params = [];
-    Usuario.dataSource.connector.query(sql, params, cb)
-  };
-  // eliminado
-  Usuario.obtieneClienteEliminado = function(cb) {
-    var sql = 'SELECT us.id, us.realm, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN role rl on us.roleid = rl.id WHERE estado = "Eliminado" ';
-    var params = [];
-    Usuario.dataSource.connector.query(sql, params, cb)
-  };
-
-  Usuario.cambiaEstado = function(id, cb) { 
-    var sql = 'UPDATE usuario SET estado = "Eliminado" WHERE id = ?'; 
-    var params = [id];
-    Usuario.dataSource.connector.query(sql, params, cb)
-  };
-// Eliminado
-  Usuario.restableceEstado = function(id, cb) {
-    var sql = 'UPDATE usuario SET estado = "Activo" WHERE id = ?'; 
-    var params = [id];
-    Usuario.dataSource.connector.query(sql, params, cb)
-  };
-
-
-
   /**
-   * Change this usuario's password (prototype/instance version).
+   * Change this users's password (prototype/instance version).
    *
    * @param {string} oldPassword Current password, required in order
-   *   to strongly verify the identity of the requesting usuario
+   *   to strongly verify the identity of the requesting users
    * @param {string} newPassword The new password to use.
    * @param {object} [options]
    * @callback {Function} callback
@@ -506,10 +470,36 @@ module.exports = function(Usuario) {
     return cb.promise;
   };
 
+  Usuario.obtieneCliente = function(cb) {
+    var sql = 'SELECT us.id, us.realm, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN role rl on us.roleid = rl.id WHERE estado = "Activo" ';
+    var params = [];
+    Usuario.dataSource.connector.query(sql, params, cb)
+  };
+  // eliminado
+  Usuario.obtieneClienteEliminado = function(cb) {
+    var sql = 'SELECT us.id, us.realm, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN role rl on us.roleid = rl.id WHERE estado = "Eliminado" ';
+    var params = [];
+    Usuario.dataSource.connector.query(sql, params, cb)
+  };
+
+  Usuario.cambiaEstado = function(id, cb) { 
+    var sql = 'UPDATE usuario SET estado = "Eliminado" WHERE id = ?'; 
+    var params = [id];
+    Usuario.dataSource.connector.query(sql, params, cb)
+  };
+// Eliminado
+  Usuario.restableceEstado = function(id, cb) {
+    var sql = 'UPDATE usuario SET estado = "Activo" WHERE id = ?'; 
+    var params = [id];
+    Usuario.dataSource.connector.query(sql, params, cb)
+  };
+
+ 
+
   /**
-   * Set this usuario's password after a password-reset request was made.
+   * Set this users's password after a password-reset request was made.
    *
-   * @param {*} usuarioId Id of the usuario changing the password
+   * @param {*} usuarioId Id of the users changing the password
    * @param {string} newPassword The new password to use.
    * @param {Object} [options] Additional options including remoting context
    * @callback {Function} callback
@@ -527,12 +517,12 @@ module.exports = function(Usuario) {
     cb = cb || utils.createPromiseCallback();
 
     // Make sure to use the constructor of the (sub)class
-    // where the method is invoked from (`this` instead of `Usuario`)
+    // where the method is invoked from (`this` instead of `Users`)
     this.findById(usuarioId, options, (err, inst) => {
       if (err) return cb(err);
 
       if (!inst) {
-        const err = new Error(`Usuario ${usuarioId} not found`);
+        const err = new Error(` Usuario ${usuarioId} not found`);
         Object.assign(err, {
           code: 'USUARIO_NOT_FOUND',
           statusCode: 401,
@@ -547,7 +537,7 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Set this usuario's password. The callers of this method
+   * Set this Users's password. The callers of this method
    * must ensure the client making the request is authorized
    * to change the password, typically by providing the correct
    * current password or a password-reset token.
@@ -589,15 +579,15 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Returns default verification options to use when calling Usuario.prototype.verify()
-   * from remote method /usuario/:id/verify.
+   * Returns default verification options to use when calling Users.prototype.verify()
+   * from remote method /users/:id/verify.
    *
-   * NOTE: the Usuario.getVerifyOptions() method can also be used to ease the
+   * NOTE: the Users.getVerifyOptions() method can also be used to ease the
    * building of identity verification options.
    *
    * ```js
-   * var verifyOptions = Myusuario.getVerifyOptions();
-   * usuario.verify(verifyOptions);
+   * var verifyOptions = MyUser.getVerifyOptions();
+   * users.verify(verifyOptions);
    * ```
    *
    * This is the full list of possible params, with example values
@@ -621,27 +611,27 @@ module.exports = function(Usuario) {
    *     cb(null, 'some body template');
    *   }
    *   redirect: '/',
-   *   verifyHref: 'http://localhost:3000/api/usuario/confirm',
+   *   verifyHref: 'http://localhost:3000/api/users/confirm',
    *   host: 'localhost'
    *   protocol: 'http'
    *   port: 3000,
    *   restApiRoot= '/api',
-   *   generateVerificationToken: function (usuario, options, cb) {
+   *   generateVerificationToken: function (users, options, cb) {
    *     cb(null, 'random-token');
    *   }
    * }
    * ```
    *
-   * NOTE: param `to` internally defaults to usuario's email but can be overriden for
+   * NOTE: param `to` internally defaults to users's email but can be overriden for
    * test purposes or advanced customization.
    *
-   * Static default params can be modified in your custom usuario model json definition
+   * Static default params can be modified in your custom users model json definition
    * using `settings.verifyOptions`. Any default param can be programmatically modified
    * like follows:
    *
    * ```js
-   * customusuarioModel.getVerifyOptions = function() {
-   *   const base = MyUsuario.base.getVerifyOptions();
+   * customUserModel.getVerifyOptions = function() {
+   *   const base = MyUser.base.getVerifyOptions();
    *   return Object.assign({}, base, {
    *     // custom values
    *   });
@@ -649,7 +639,7 @@ module.exports = function(Usuario) {
    * ```
    *
    * Usually you should only require to modify a subset of these params
-   * See `Usuario.verify()` and `Usuario.prototype.verify()` doc for params reference
+   * See `Users.verify()` and `Users.prototype.verify()` doc for params reference
    * and their default values.
    */
 
@@ -662,7 +652,7 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Verify a usuario's identity by sending them a confirmation message.
+   * Verify a users's identity by sending them a confirmation message.
    * NOTE: Currently only email verification is supported
    *
    * ```js
@@ -671,20 +661,20 @@ module.exports = function(Usuario) {
    *   from: 'noreply@example.com'
    *   template: 'verify.ejs',
    *   redirect: '/',
-   *   generateVerificationToken: function (usuario, options, cb) {
+   *   generateVerificationToken: function (users, options, cb) {
    *     cb('random-token');
    *   }
    * };
    *
-   * usuario.verify(verifyOptions);
+   * users.verify(verifyOptions);
    * ```
    *
-   * NOTE: the Usuario.getVerifyOptions() method can also be used to ease the
+   * NOTE: the Users.getVerifyOptions() method can also be used to ease the
    * building of identity verification options.
    *
    * ```js
-   * var verifyOptions = MyUsuario.getVerifyOptions();
-   * usuario.verify(verifyOptions);
+   * var verifyOptions = MyUser.getVerifyOptions();
+   * users.verify(verifyOptions);
    * ```
    *
    * @options {Object} verifyOptions
@@ -693,10 +683,10 @@ module.exports = function(Usuario) {
    *  The `.send()` method must accept the verifyOptions object, the method's
    *  remoting context options object and a callback function with `(err, email)`
    *  as parameters.
-   *  Defaults to provided `usuarioModel.email` function, or ultimately to LoopBack's
+   *  Defaults to provided `userModel.email` function, or ultimately to LoopBack's
    *  own mailer function.
    * @property {String} to Email address to which verification email is sent.
-   *  Defaults to usuario's email. Can also be overriden to a static value for test
+   *  Defaults to users's email. Can also be overriden to a static value for test
    *  purposes.
    * @property {String} from Sender email address
    *  For example `'noreply@example.com'`.
@@ -714,11 +704,11 @@ module.exports = function(Usuario) {
    *  object and a callback function with `(err, html)` as parameters.
    *  A default templateFn function is provided, see `createVerificationEmailBody()`
    *  for implementation details.
-   * @property {String} redirect Page to which usuario will be redirected after
+   * @property {String} redirect Page to which users will be redirected after
    *  they verify their email. Defaults to `'/'`.
-   * @property {String} verifyHref The link to include in the usuario's verify message.
+   * @property {String} verifyHref The link to include in the users's verify message.
    *  Defaults to an url analog to:
-   *  `http://host:port/restApiRoot/usuarioRestPath/confirm?uid=usuarioId&redirect=/``
+   *  `http://host:port/restApiRoot/userRestPath/confirm?uid=userId&redirect=/``
    * @property {String} host The API host. Defaults to app's host or `localhost`.
    * @property {String} protocol The API protocol. Defaults to `'http'`.
    * @property {Number} port The API port. Defaults to app's port or `3000`.
@@ -728,8 +718,8 @@ module.exports = function(Usuario) {
    *  generate the verification token.
    *  It must accept the verifyOptions object, the method's remoting context options
    *  object and a callback function with `(err, hexStringBuffer)` as parameters.
-   *  This function should NOT add the token to the usuario object, instead simply
-   *  execute the callback with the token! usuario saving and email sending will be
+   *  This function should NOT add the token to the users object, instead simply
+   *  execute the callback with the token! Users saving and email sending will be
    *  handled in the `verify()` method.
    *  A default token generation function is provided, see `generateVerificationToken()`
    *  for implementation details.
@@ -748,12 +738,12 @@ module.exports = function(Usuario) {
     cb = cb || utils.createPromiseCallback();
 
     var usuario = this;
-    var usuarioModel = this.constructor;
-    var registry = usuarioModel.registry;
+    var userModel = this.constructor;
+    var registry = userModel.registry;
     verifyOptions = Object.assign({}, verifyOptions);
     // final assertion is performed once all options are assigned
     assert(typeof verifyOptions === 'object',
-      'verifyOptions object param required when calling usuario.verify()');
+      'verifyOptions object param required when calling users.verify()');
 
     // Shallow-clone the options object so that we don't override
     // the global default options object
@@ -764,20 +754,20 @@ module.exports = function(Usuario) {
 
     // Set a default token generation function if none provided
     verifyOptions.generateVerificationToken = verifyOptions.generateVerificationToken ||
-      Usuario.generateVerificationToken;
+    Usuario.generateVerificationToken;
 
     // Set a default mailer function if none provided
-    verifyOptions.mailer = verifyOptions.mailer || usuarioModel.email ||
+    verifyOptions.mailer = verifyOptions.mailer || userModel.email ||
       registry.getModelByType(loopback.Email);
 
-    var pkName = usuarioModel.definition.idName() || 'id';
+    var pkName = userModel.definition.idName() || 'id';
     verifyOptions.redirect = verifyOptions.redirect || '/';
     var defaultTemplate = path.join(__dirname, '..', '..', 'templates', 'verify.ejs');
     verifyOptions.template = path.resolve(verifyOptions.template || defaultTemplate);
     verifyOptions.usuario = usuario;
     verifyOptions.protocol = verifyOptions.protocol || 'http';
 
-    var app = usuarioModel.app;
+    var app = userModel.app;
     verifyOptions.host = verifyOptions.host || (app && app.get('host')) || 'localhost';
     verifyOptions.port = verifyOptions.port || (app && app.get('port')) || 3000;
     verifyOptions.restApiRoot = verifyOptions.restApiRoot || (app && app.get('restApiRoot')) || '/api';
@@ -788,10 +778,10 @@ module.exports = function(Usuario) {
     ) ? '' : ':' + verifyOptions.port;
 
     if (!verifyOptions.verifyHref) {
-      const confirmMethod = usuarioModel.sharedClass.findMethodByName('confirm');
+      const confirmMethod = userModel.sharedClass.findMethodByName('confirm');
       if (!confirmMethod) {
         throw new Error(
-          'Cannot build usuario verification URL, ' +
+          'Cannot build usuarios verification URL, ' +
           'the default confirm method is not public. ' +
           'Please provide the URL in verifyOptions.verifyHref.'
         );
@@ -799,7 +789,7 @@ module.exports = function(Usuario) {
 
       const urlPath = joinUrlPath(
         verifyOptions.restApiRoot,
-        usuarioModel.http.path,
+        userModel.http.path,
         confirmMethod.http.path
       );
 
@@ -825,12 +815,12 @@ module.exports = function(Usuario) {
     // argument "options" is passed depending on verifyOptions.generateVerificationToken function requirements
     var tokenGenerator = verifyOptions.generateVerificationToken;
     if (tokenGenerator.length == 3) {
-      tokenGenerator(usuario, options, addTokenToUsuarioAndSave);
+      tokenGenerator(usuario, options, addTokenToUserAndSave);
     } else {
-      tokenGenerator(usuario, addTokenToUsuarioAndSave);
+      tokenGenerator(usuario, addTokenToUserAndSave);
     }
 
-    function addTokenToUsuarioAndSave(err, token) {
+    function addTokenToUserAndSave(err, token) {
       if (err) return cb(err);
       usuario.verificationToken = token;
       usuario.save(options, function(err) {
@@ -888,9 +878,9 @@ module.exports = function(Usuario) {
   function assertVerifyOptions(verifyOptions) {
     assert(verifyOptions.type, 'You must supply a verification type (verifyOptions.type)');
     assert(verifyOptions.type === 'email', 'Unsupported verification type');
-    assert(verifyOptions.to, 'Must include verifyOptions.to when calling usuario.verify() ' +
-      'or the usuario must have an email property');
-    assert(verifyOptions.from, 'Must include verifyOptions.from when calling usuario.verify()');
+    assert(verifyOptions.to, 'Must include verifyOptions.to when calling users.verify() ' +
+      'or the users must have an email property');
+    assert(verifyOptions.from, 'Must include verifyOptions.from when calling users.verify()');
     assert(typeof verifyOptions.templateFn === 'function',
       'templateFn must be a function');
     assert(typeof verifyOptions.generateVerificationToken === 'function',
@@ -906,13 +896,13 @@ module.exports = function(Usuario) {
   }
 
   /**
-   * A default verification token generator which accepts the usuario the token is
+   * A default verification token generator which accepts the user the token is
    * being generated for and a callback function to indicate completion.
    * This one uses the crypto library and 64 random bytes (converted to hex)
-   * for the token. When used in combination with the usuario.verify() method this
-   * function will be called with the `usuario` object as it's context (`this`).
+   * for the token. When used in combination with the user.verify() method this
+   * function will be called with the `user` object as it's context (`this`).
    *
-   * @param {object} usuario The Usuario this token is being generated for.
+   * @param {object} usuarios The User this token is being generated for.
    * @param {object} options remote context options.
    * @param {Function} cb The generator must pass back the new token with this function call.
    */
@@ -923,11 +913,11 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Confirm the usuario's identity.
+   * Confirm the user's identity.
    *
    * @param {Any} usuarioId
    * @param {String} token The validation token
-   * @param {String} redirect URL to redirect the usuario to once confirmed
+   * @param {String} redirect URL to redirect the user to once confirmed
    * @callback {Function} callback
    * @param {Error} err
    * @promise
@@ -939,9 +929,9 @@ module.exports = function(Usuario) {
         fn(err);
       } else {
         if (usuario && usuario.verificationToken === token) {
-          usuario.verificationToken = null;
-          usuario.emailVerified = true;
-          usuario.save(function(err) {
+            usuario.verificationToken = null;
+            usuario.emailVerified = true;
+            usuario.save(function(err) {
             if (err) {
               fn(err);
             } else {
@@ -954,7 +944,7 @@ module.exports = function(Usuario) {
             err.statusCode = 400;
             err.code = 'INVALID_TOKEN';
           } else {
-            err = new Error(g.f('Usuario not found: %s', uid));
+            err = new Error(g.f('Usuarios not found: %s', uid));
             err.statusCode = 404;
             err.code = 'USUARIO_NOT_FOUND';
           }
@@ -966,12 +956,12 @@ module.exports = function(Usuario) {
   };
 
   /**
-   * Create a short lived access token for temporary login. Allows usuarios
+   * Create a short lived access token for temporary login. Allows users
    * to change passwords if forgotten.
    *
    * @options {Object} options
-   * @prop {String} email The usuario's email address
-   * @property {String} realm The usuario's realm (optional)
+   * @prop {String} email The users's email address
+   * @property {String} realm The users's realm (optional)
    * @callback {Function} callback
    * @param {Error} err
    * @promise
@@ -979,8 +969,8 @@ module.exports = function(Usuario) {
 
   Usuario.resetPassword = function(options, cb) {
     cb = cb || utils.createPromiseCallback();
-    var UsuarioModel = this;
-    var ttl = UsuarioModel.settings.resetPasswordTokenTTL || DEFAULT_RESET_PW_TTL;
+    var UserModel = this;
+    var ttl = UserModel.settings.resetPasswordTokenTTL || DEFAULT_RESET_PW_TTL;
     options = options || {};
     if (typeof options.email !== 'string') {
       var err = new Error(g.f('Email is required'));
@@ -992,7 +982,7 @@ module.exports = function(Usuario) {
 
     try {
       if (options.password) {
-        UsuarioModel.validatePassword(options.password);
+        UserModel.validatePassword(options.password);
       }
     } catch (err) {
       return cb(err);
@@ -1003,7 +993,7 @@ module.exports = function(Usuario) {
     if (options.realm) {
       where.realm = options.realm;
     }
-    UsuarioModel.findOne({where: where}, function(err, usuario) {
+    UserModel.findOne({where: where}, function(err, usuario) {
       if (err) {
         return cb(err);
       }
@@ -1015,14 +1005,14 @@ module.exports = function(Usuario) {
       }
       // create a short lived access token for temp login to change password
       // TODO(ritch) - eventually this should only allow password change
-      if (UsuarioModel.settings.emailVerificationRequired && !usuario.emailVerified) {
+      if (UserModel.settings.emailVerificationRequired && !usuario.emailVerified) {
         err = new Error(g.f('Email has not been verified'));
         err.statusCode = 401;
         err.code = 'RESET_FAILED_EMAIL_NOT_VERIFIED';
         return cb(err);
       }
 
-      if (UsuarioModel.settings.restrictResetPasswordTokenScope) {
+      if (UserModel.settings.restrictResetPasswordTokenScope) {
         const tokenData = {
           ttl: ttl,
           scopes: ['reset-password'],
@@ -1030,7 +1020,7 @@ module.exports = function(Usuario) {
         usuario.createAccessToken(tokenData, options, onTokenCreated);
       } else {
         // We need to preserve backwards-compatibility with
-        // usuario-supplied implementations of "createAccessToken"
+        // user-supplied implementations of "createAccessToken"
         // that may not support "options" argument (we have such
         // examples in our test suite).
         usuario.createAccessToken(ttl, onTokenCreated);
@@ -1041,7 +1031,7 @@ module.exports = function(Usuario) {
           return cb(err);
         }
         cb();
-        UsuarioModel.emit('resetPasswordRequest', {
+        UserModel.emit('resetPasswordRequest', {
           email: options.email,
           accessToken: accessToken,
           usuario: usuario,
@@ -1082,7 +1072,7 @@ module.exports = function(Usuario) {
     }
   };
 
-  Usuario._invalidateAccessTokensOfUsuarios = function(usuarioIds, options, cb) {
+  Usuario._invalidateAccessTokensOfUsers = function(usuarioIds, options, cb) {
     if (typeof options === 'function' && cb === undefined) {
       cb = options;
       options = {};
@@ -1102,10 +1092,10 @@ module.exports = function(Usuario) {
       query[tokenPK] = {neq: options.accessToken[tokenPK]};
     }
     // add principalType in AccessToken.query if using polymorphic relations
-    // between AccessToken and Usuario
-    var relatedUsuario = AccessToken.relations.usuario;
-    var isRelationPolymorphic = relatedUsuario && relatedUsuario.polymorphic &&
-      !relatedUsuario.modelTo;
+    // between AccessToken and User
+    var relatedUser = AccessToken.relations.usuario;
+    var isRelationPolymorphic = relatedUser && relatedUser.polymorphic &&
+      !relatedUser.modelTo;
     if (isRelationPolymorphic) {
       query.principalType = this.modelName;
     }
@@ -1113,27 +1103,27 @@ module.exports = function(Usuario) {
   };
 
   /*!
-   * Setup an extended usuario model.
+   * Setup an extended user model.
    */
 
   Usuario.setup = function() {
     // We need to call the base class's setup method
     Usuario.base.setup.call(this);
-    var UsuarioModel = this;
+    var UserModel = this;
 
     // max ttl
     this.settings.maxTTL = this.settings.maxTTL || DEFAULT_MAX_TTL;
     this.settings.ttl = this.settings.ttl || DEFAULT_TTL;
 
-    UsuarioModel.setter.email = function(value) {
-      if (!UsuarioModel.settings.caseSensitiveEmail && typeof value === 'string') {
+    UserModel.setter.email = function(value) {
+      if (!UserModel.settings.caseSensitiveEmail && typeof value === 'string') {
         this.$email = value.toLowerCase();
       } else {
         this.$email = value;
       }
     };
 
-    UsuarioModel.setter.password = function(plain) {
+    UserModel.setter.password = function(plain) {
       if (typeof plain !== 'string') {
         return;
       }
@@ -1147,7 +1137,7 @@ module.exports = function(Usuario) {
     };
 
     // Make sure emailVerified is not set by creation
-    UsuarioModel.beforeRemote('create', function(ctx, usuario, next) {
+    UserModel.beforeRemote('create', function(ctx, usuario, next) {
       var body = ctx.req.body;
       if (body && body.emailVerified) {
         body.emailVerified = false;
@@ -1155,10 +1145,10 @@ module.exports = function(Usuario) {
       next();
     });
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'login',
       {
-        description: 'Login a usuario with nombre/email and password.',
+        description: 'Login a Usuario with nombre/email and password.',
         accepts: [
           {arg: 'credentials', type: 'object', required: true, http: {source: 'body'}},
           {arg: 'include', type: ['string'], http: {source: 'query'},
@@ -1171,14 +1161,14 @@ module.exports = function(Usuario) {
             g.f('The response body contains properties of the {{AccessToken}} created on login.\n' +
             'Depending on the value of `include` parameter, the body may contain ' +
             'additional properties:\n\n' +
-            '  - `usuario` - `U+007BUsuarioU+007D` - Data of the currently logged in usuario. ' +
-            '{{(`include=usuario`)}}\n\n'),
+            '  - ` usuario` - `U+007BUserU+007D` - Data of the currently logged in usuario. ' +
+            '{{(`include=users`)}}\n\n'),
         },
         http: {verb: 'post'},
       }
     );
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'logout',
       {
         description: 'Logout a usuario with access token.',
@@ -1197,7 +1187,7 @@ module.exports = function(Usuario) {
       }
     );
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'prototype.verify',
       {
         description: 'Trigger usuario\'s identity verification with configured verifyOptions',
@@ -1209,10 +1199,10 @@ module.exports = function(Usuario) {
       }
     );
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'confirm',
       {
-        description: 'Confirm a usuario registration with identity verification token.',
+        description: 'Confirm a user registration with identity verification token.',
         accepts: [
           {arg: 'uid', type: 'string', required: true},
           {arg: 'token', type: 'string', required: true},
@@ -1222,10 +1212,10 @@ module.exports = function(Usuario) {
       }
     );
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'resetPassword',
       {
-        description: 'Reset password for a usuario with email.',
+        description: 'Reset password for a user with email.',
         accepts: [
           {arg: 'options', type: 'object', required: true, http: {source: 'body'}},
         ],
@@ -1233,12 +1223,12 @@ module.exports = function(Usuario) {
       }
     );
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'changePassword',
       {
-        description: 'Change a usuario\'s password.',
+        description: 'Change a user\'s password.',
         accepts: [
-          {arg: 'id', type: 'any', http: getUsuarioIdFromRequestContext},
+          {arg: 'id', type: 'any', http: getUserIdFromRequestContext},
           {arg: 'oldPassword', type: 'string', required: true, http: {source: 'form'}},
           {arg: 'newPassword', type: 'string', required: true, http: {source: 'form'}},
           {arg: 'options', type: 'object', http: 'optionsFromRequest'},
@@ -1247,83 +1237,81 @@ module.exports = function(Usuario) {
       }
     );
 
-    UsuarioModel.remoteMethod("obtieneCliente", {
-      returns: {
-        arg: "Usuario",
-        type: "object", root: true
-      },
-      http: {
-        path: "/obtieneUsuario",
-        verb: "get" 
-      },
-      description: [
-        'Obtiene los clientes en estado activo',
-      ]});
-
-      UsuarioModel.remoteMethod("obtieneClienteEliminado", {
+    UserModel.remoteMethod("obtieneCliente", {
         returns: {
           arg: "Usuario",
           type: "object", root: true
         },
         http: {
-          path: "/obtieneUsuarioEliminado",
+          path: "/obtieneUsuario",
           verb: "get" 
         },
         description: [
-          'Obtiene los usuario en estado eliminado',
+          'Obtiene los clientes en estado activo',
         ]});
-      
-      UsuarioModel.remoteMethod("cambiaEstado", {
-        returns: {
-          arg: "Usuario",
-          type: "object", root: true
-        },
-        http: {
-          path: "/cambiaEstado",
-          verb: "put" 
-        },
-        description: [
-          'Cambia estado del usuario a eliminado',
-        ],
-        accepts: [
-          {
-            arg: 'id',
-            type: 'number',
-            required: true,
-          },]
-      });
-      
-      UsuarioModel.remoteMethod("restableceEstado", {
-        returns: {
-          arg: "Usuario",
-          type: "object", root: true
-        },
-        http: {
-          path: "/restableceEstado",
-          verb: "put" 
-        },
-        description: [
-          'Cambia estado del usuario a activo',
-        ],
-        accepts: [
-          {
-            arg: 'id',
-            type: 'number',
-            required: true,
-          },]
-      });
-      
-    
+  
+        UserModel.remoteMethod("obtieneClienteEliminado", {
+          returns: {
+            arg: "Usuario",
+            type: "object", root: true
+          },
+          http: {
+            path: "/obtieneUsuarioEliminado",
+            verb: "get" 
+          },
+          description: [
+            'Obtiene los usuario en estado eliminado',
+          ]});
+        
+        UserModel.remoteMethod("cambiaEstado", {
+          returns: {
+            arg: "Usuario",
+            type: "object", root: true
+          },
+          http: {
+            path: "/cambiaEstado",
+            verb: "put" 
+          },
+          description: [
+            'Cambia estado del usuario a eliminado',
+          ],
+          accepts: [
+            {
+              arg: 'id',
+              type: 'number',
+              required: true,
+            },]
+        });
+        
+        UserModel.remoteMethod("restableceEstado", {
+          returns: {
+            arg: "Usuario",
+            type: "object", root: true
+          },
+          http: {
+            path: "/restableceEstado",
+            verb: "put" 
+          },
+          description: [
+            'Cambia estado del usuario a activo',
+          ],
+          accepts: [
+            {
+              arg: 'id',
+              type: 'number',
+              required: true,
+            },]
+        });
 
-    const setPasswordScopes = UsuarioModel.settings.restrictResetPasswordTokenScope ?
+    const setPasswordScopes = UserModel.settings.restrictResetPasswordTokenScope ?
       ['reset-password'] : undefined;
 
-    UsuarioModel.remoteMethod(
+    UserModel.remoteMethod(
       'setPassword',
       {
         description: 'Reset usuario\'s password via a password-reset token.',
         accepts: [
-          {arg: 'id', type: 'any', http: getUsuarioIdFromRequestContext},
+          {arg: 'id', type: 'any', http: getUserIdFromRequestContext},
           {arg: 'newPassword', type: 'string', required: true, http: {source: 'form'}},
           {arg: 'options', type: 'object', http: 'optionsFromRequest'},
         ],
@@ -1332,15 +1320,15 @@ module.exports = function(Usuario) {
       }
     );
 
-    function getUsuarioIdFromRequestContext(ctx) {
+    function getUserIdFromRequestContext(ctx) {
       const token = ctx.req.accessToken;
       if (!token) return;
 
       const hasPrincipalType = 'principalType' in token;
-      if (hasPrincipalType && token.principalType !== UsuarioModel.modelName) {
-        // We have multiple usuario models related to the same access token model
+      if (hasPrincipalType && token.principalType !== UserModel.modelName) {
+        // We have multiple user models related to the same access token model
         // and the token used to authorize reset-password request was created
-        // for a different usuario model.
+        // for a different user model.
         const err = new Error(g.f('Access Denied'));
         err.statusCode = 403;
         throw err;
@@ -1349,7 +1337,7 @@ module.exports = function(Usuario) {
       return token.usuarioId;
     }
 
-    UsuarioModel.afterRemote('confirm', function(ctx, inst, next) {
+    UserModel.afterRemote('confirm', function(ctx, inst, next) {
       if (ctx.args.redirect !== undefined) {
         if (!ctx.res) {
           return next(new Error(g.f('The transport does not support HTTP redirects.')));
@@ -1361,33 +1349,33 @@ module.exports = function(Usuario) {
     });
 
     // default models
-    assert(loopback.Email, 'Email model must be defined before Usuario model');
-    UsuarioModel.email = loopback.Email;
+    assert(loopback.Email, 'Email model must be defined before usuario model');
+    UserModel.email = loopback.Email;
 
-    assert(loopback.AccessToken, 'AccessToken model must be defined before Usuario model');
-    UsuarioModel.accessToken = loopback.AccessToken;
+    assert(loopback.AccessToken, 'AccessToken model must be defined before usuario model');
+    UserModel.accessToken = loopback.AccessToken;
 
-    UsuarioModel.validate('email', emailValidator, {
+    UserModel.validate('email', emailValidator, {
       message: g.f('Must provide a valid email'),
     });
 
     // Realm usuarios validation
-    if (UsuarioModel.settings.realmRequired && UsuarioModel.settings.realmDelimiter) {
-      UsuarioModel.validatesUniquenessOf('email', {
+    if (UserModel.settings.realmRequired && UserModel.settings.realmDelimiter) {
+      UserModel.validatesUniquenessOf('email', {
         message: 'Email already exists',
         scopedTo: ['realm'],
       });
-      UsuarioModel.validatesUniquenessOf('nombre', {
+      UserModel.validatesUniquenessOf('nombre', {
         message: 'Usuario already exists',
         scopedTo: ['realm'],
       });
     } else {
       // Regular(Non-realm) usuarios validation
-      UsuarioModel.validatesUniquenessOf('email', {message: 'Email already exists'});
-      UsuarioModel.validatesUniquenessOf('nombre', {message: 'Usuario already exists'});
+      UserModel.validatesUniquenessOf('email', {message: 'Email already exists'});
+      UserModel.validatesUniquenessOf('nombre', {message: 'Usuario already exists'});
     }
 
-    return UsuarioModel;
+    return UserModel;
   };
 
   /*!
@@ -1411,8 +1399,8 @@ module.exports = function(Usuario) {
   });
 
   Usuario.observe('before save', function rejectInsecurePasswordChange(ctx, next) {
-    const UsuarioModel = ctx.Model;
-    if (!UsuarioModel.settings.rejectPasswordChangesViaPatchOrReplace) {
+    const UserModel = ctx.Model;
+    if (!UserModel.settings.rejectPasswordChangesViaPatchOrReplace) {
       // In legacy password flow, any DAO method can change the password
       return next();
     }
@@ -1463,9 +1451,9 @@ module.exports = function(Usuario) {
       where[pkName] = ctx.instance[pkName];
     }
 
-    ctx.Model.find({where: where}, ctx.options, function(err, usuarioInstances) {
+    ctx.Model.find({where: where}, ctx.options, function(err, userInstances) {
       if (err) return next(err);
-      ctx.hookState.originalUsuarioData = usuarioInstances.map(function(u) {
+      ctx.hookState.originalUserData = userInstances.map(function(u) {
         var usuario = {};
         usuario[pkName] = u[pkName];
         usuario.email = u.email;
@@ -1476,8 +1464,8 @@ module.exports = function(Usuario) {
       if (ctx.instance) {
         // Check if map does not return an empty array
         // Fix server crashes when try to PUT a non existent id
-        if (ctx.hookState.originalUsuarioData.length > 0) {
-          emailChanged = ctx.instance.email !== ctx.hookState.originalUsuarioData[0].email;
+        if (ctx.hookState.originalUserData.length > 0) {
+          emailChanged = ctx.instance.email !== ctx.hookState.originalUserData[0].email;
         } else {
           emailChanged = true;
         }
@@ -1486,7 +1474,7 @@ module.exports = function(Usuario) {
           ctx.instance.emailVerified = false;
         }
       } else if (ctx.data.email) {
-        emailChanged = ctx.hookState.originalUsuarioData.some(function(data) {
+        emailChanged = ctx.hookState.originalUserData.some(function(data) {
           return data.email != ctx.data.email;
         });
         if (emailChanged && ctx.Model.settings.emailVerificationRequired) {
@@ -1500,7 +1488,7 @@ module.exports = function(Usuario) {
 
   Usuario.observe('after save', function invalidateOtherTokens(ctx, next) {
     if (!ctx.instance && !ctx.data) return next();
-    if (!ctx.hookState.originalUsuarioData) return next();
+    if (!ctx.hookState.originalUserData) return next();
 
     var pkName = ctx.Model.definition.idName() || 'id';
     var newEmail = (ctx.instance || ctx.data).email;
@@ -1510,13 +1498,13 @@ module.exports = function(Usuario) {
 
     if (ctx.options.preserveAccessTokens) return next();
 
-    var usuarioIdsToExpire = ctx.hookState.originalUsuarioData.filter(function(u) {
+    var userIdsToExpire = ctx.hookState.originalUserData.filter(function(u) {
       return (newEmail && u.email !== newEmail) ||
         (newPassword && u.password !== newPassword);
     }).map(function(u) {
       return u[pkName];
     });
-    ctx.Model._invalidateAccessTokensOfUsuarios(usuarioIdsToExpire, ctx.options, next);
+    ctx.Model._invalidateAccessTokensOfUsers(userIdsToExpire, ctx.options, next);
   });
 };
 
@@ -1540,5 +1528,3 @@ function joinUrlPath(args) {
   }
   return result;
 }
-
-
