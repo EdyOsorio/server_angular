@@ -16,6 +16,9 @@
   "User": {
     "dataSource": "db"
   },
+  "usuario": {
+    "dataSource": "db"
+  },
   "AccessToken": {
     "dataSource": "db",
     "public": false
