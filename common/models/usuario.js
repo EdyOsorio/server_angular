@@ -447,13 +447,13 @@ module.exports = function(Usuario) {
 
 
   Usuario.obtieneCliente = function(cb) {
-    var sql = 'SELECT us.id, us.realm, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN Role rl on us.roleid = rl.id WHERE estado = "Activo"';
+    var sql = 'SELECT us.id, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN Role rl on us.roleid = rl.id WHERE estado = "Activo"';
     var params = [];
     Usuario.dataSource.connector.query(sql, params, cb)
   };
   // eliminado
   Usuario.obtieneClienteEliminado = function(cb) {
-    var sql = 'SELECT us.id, us.realm, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN Role rl on us.roleid = rl.id WHERE estado = "Eliminado" ';
+    var sql = 'SELECT us.id, us.nombre, us.password, us.email, us.estado, rl.id as roleid, rl.name as rol FROM usuario us LEFT JOIN Role rl on us.roleid = rl.id WHERE estado = "Eliminado" ';
     var params = [];
     Usuario.dataSource.connector.query(sql, params, cb)
   };
