@@ -1,10 +1,10 @@
-/*
+
 // eslint-disable-next-line strict
 module.exports = function(app) {
   var ds = app.dataSources.db;
   // eslint-disable-next-line max-len
-  var dbTables = ['usuario', 'User', 'AccessToken', 'ACL', 'RoleMapping', 'Role', 'categoria', 'cliente',
-    'detallefactura', 'factura', 'pago', 'pedido', 'producto', 'direccionCliente']; // En este array pondremos los nombres de los modelos
+  var dbTables = ['User', 'AccessToken', 'ACL', 'RoleMapping', 'Role', 'categoria', 'cliente',
+    'detallefactura', 'factura', 'pago', 'pedido', 'producto', 'direccionCliente', 'usuario']; // En este array pondremos los nombres de los modelos
   if (dbTables.length !== 0) {
     ds.automigrate(dbTables, function(err) {
       if (err) throw err;
@@ -17,4 +17,3 @@ module.exports = function(app) {
   }
   // ds.disconnect(); //Descomentar si se pone fuera de la carpeta boot
 };
-*/

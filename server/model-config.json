@@ -16,9 +16,6 @@
   "User": {
     "dataSource": "db"
   },
-  "usuario": {
-    "dataSource": "db"
-  },
   "AccessToken": {
     "dataSource": "db",
     "public": false
@@ -37,6 +34,10 @@
   "Role": {
     "dataSource": "db",
     "public": false
+  },
+  "usuario": {
+    "dataSource": "db",
+    "public": true
   },
   "categoria": {
     "dataSource": "db",
