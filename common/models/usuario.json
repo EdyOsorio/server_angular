@@ -143,11 +143,6 @@
       "options": {
         "disableInclude": true
       }
-    },
-    "Role": {
-      "type": "hasOne",
-      "model": "Role",
-      "foreignKey": "idusuario"
     }
   }
   
