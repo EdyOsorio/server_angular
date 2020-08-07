@@ -1,4 +1,4 @@
-
+/*
 // eslint-disable-next-line strict
 module.exports = function(app) {
   var ds = app.dataSources.db;
@@ -17,3 +17,4 @@ module.exports = function(app) {
   }
   // ds.disconnect(); //Descomentar si se pone fuera de la carpeta boot
 };
+*/
