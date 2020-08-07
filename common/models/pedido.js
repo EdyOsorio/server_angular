@@ -2,7 +2,7 @@
 var OneSignal = require("onesignal-node");
 module.exports = function(Pedido) {
   Pedido.conteoPedido = function(cb) {
-    var sql = 'SELECT UPPER(concat(cl.nombre, " ", cl.apellido)) as nombre, cl.telefono, pe.numeropedido, pe.estado, COUNT(pe.numeropedido) as items, pe.idcliente, drc.sector, CONCAT(drc.calleprincipal, " ", "y", " ", drc.callesecundaria, " ","#", " ", drc.numero) as direccionEnvio FROM cliente cl LEFT JOIN pedido pe ON pe.idcliente = cl.id LEFT JOIN direccioncliente drc on drc.idcliente = cl.id and drc.numeropedido = pe.numeropedido WHERE pe.estado ="Pendiente" GROUP BY pe.numeropedido';
+    var sql = 'SELECT UPPER(concat(cl.nombre, " ", cl.apellido)) as nombre, cl.telefono, pe.numeropedido, pe.estado, COUNT(pe.numeropedido) as items, pe.idcliente, drc.sector, CONCAT(drc.calleprincipal, " ", "y", " ", drc.callesecundaria, " ","#", " ", drc.numero) as direccionEnvio FROM cliente cl LEFT JOIN pedido pe ON pe.idcliente = cl.id LEFT JOIN direccionCliente drc on drc.idcliente = cl.id and drc.numeropedido = pe.numeropedido WHERE pe.estado ="Pendiente" GROUP BY pe.numeropedido';
     var params = [];
     Pedido.dataSource.connector.query(sql, params, cb)
   };
@@ -19,7 +19,7 @@ module.exports = function(Pedido) {
 
   // Historial
   Pedido.conteoPedidoHis = function(cb) {
-    var sql = 'SELECT UPPER(concat(cl.nombre, " ", cl.apellido)) as nombre, cl.telefono, pe.numeropedido, pe.estado, COUNT(pe.numeropedido) as items, pe.idcliente, pe.fechaPedido, drc.sector, CONCAT(drc.calleprincipal, " ", "y", " ", drc.callesecundaria, " ","#", " ", drc.numero)as direccionEnvioH FROM cliente cl LEFT JOIN pedido pe ON pe.idcliente = cl.id LEFT JOIN direccioncliente drc on drc.idcliente = cl.id and drc.numeropedido = pe.numeropedido WHERE pe.estado ="Procesado" GROUP BY pe.numeropedido'
+    var sql = 'SELECT UPPER(concat(cl.nombre, " ", cl.apellido)) as nombre, cl.telefono, pe.numeropedido, pe.estado, COUNT(pe.numeropedido) as items, pe.idcliente, pe.fechaPedido, drc.sector, CONCAT(drc.calleprincipal, " ", "y", " ", drc.callesecundaria, " ","#", " ", drc.numero)as direccionEnvioH FROM cliente cl LEFT JOIN pedido pe ON pe.idcliente = cl.id LEFT JOIN direccionCliente drc on drc.idcliente = cl.id and drc.numeropedido = pe.numeropedido WHERE pe.estado ="Procesado" GROUP BY pe.numeropedido'
     var params = [];
     Pedido.dataSource.connector.query(sql, params, cb)
   };
