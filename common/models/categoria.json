@@ -10,7 +10,7 @@
       "type": "string",
       "required": true
     },
-    "descripcion": {
+    "descripcionCategoria": {
       "type": "string",
       "default": "No especificado",
       "required": false

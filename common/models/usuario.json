@@ -30,7 +30,7 @@
     }
   },
   "validations": [],
-  "hidden": ["password"],
+  "hidden": ["password", "emai", "id"],
   "acls": [
     {
       "principalType": "ROLE",
